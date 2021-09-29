@@ -53,15 +53,14 @@ const AppBar = () => {
     await signOutUser();
   };
 
-  // console.log(user);
-
+  // It's a bad idea to have a button that directs to `create a review`.
   return <View style={styles.container}>
       <ScrollView horizontal>
       <AppBarTab text={"Repositories"} href={"/"} />
       {
       (!user.length)?
-        <AppBarTab text={"Sign In"} href={"/signIn"} />
-        :<LogOut handleClick={logout} />
+        <><AppBarTab text={"Sign In"} href={"/signIn"} /><AppBarTab text={"Sign Up"} href={"/signUp"} /></>
+        : <><LogOut handleClick={logout} /><Text style={styles.appBarText}>• {user[0]}</Text></>
       }
       </ScrollView>
   </View>;

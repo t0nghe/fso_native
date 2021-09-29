@@ -1,3 +1,5 @@
+import { Platform } from 'react-native';
+
 const theme = {
   text: {
     fontFamily: Platform.select({
@@ -6,6 +8,6 @@ const theme = {
       default: 'System'
     }),
   }
-}
+};
 
-export default theme
+export default theme;

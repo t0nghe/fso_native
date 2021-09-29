@@ -6,7 +6,8 @@ import AuthStorageContext from '../meta/authStorageContext';
 
 const useSignIn = () => {
   const authStorage = useContext(AuthStorageContext);
-  const [mutateAuthorize] = useMutation(AUTHORIZE);
+  const [mutateAuthorize] = useMutation(AUTHORIZE, 
+    {fetchPolicy: 'cache-and-network'});
   const [status, setStatus] = useState(null);
   const client = useApolloClient();
 

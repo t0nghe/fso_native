@@ -1,7 +1,9 @@
 import React from 'react';
-import { FlatList, View, StyleSheet, Image } from 'react-native';
+import { FlatList, View, StyleSheet, Image, Pressable, Button } from 'react-native';
 import Text from './Text';
 import useRepositories from '../hooks/useRepositories';
+import { useHistory } from 'react-router-native';
+import * as Linking from 'expo-linking';
 
 const styles = StyleSheet.create({
   separator: {
@@ -54,22 +56,22 @@ const styles = StyleSheet.create({
 });
 
 const RepoItemStatsLabel = (props) => {
-  return <Text style={styles.repoItemStatsLabel}>{props.children}</Text>;
+  return <Text style={styles.repoItemStatsLabel} testID="1">{props.children}</Text>;
 };
 
 const RepoItemStatsMetric = (props) => {
-  return <Text style={styles.repoItemStatsMetric}>{props.children}</Text>;
+  return <Text style={styles.repoItemStatsMetric}  testID="itemmetric">{props.children}</Text>;
 };
 
 const RepoItemImageDesc = ({fullName, description, language, avatarUrl}) => {
     return <View style={styles.repoItemFlex}>
       <View>
-        <Image style={styles.repoItemImage} source={{uri: avatarUrl}} />
+        <Image style={styles.repoItemImage} source={{uri: avatarUrl}} testID="itemimage" />
       </View>
       <View>
-        <Text style={styles.repoItemName}>{fullName}</Text>
-        <Text style={styles.repoItemDesc}>{description}</Text>
-        <Text style={styles.repoItemLang}>{language}</Text>
+        <Text style={styles.repoItemName} testID="itemname">{fullName}</Text>
+        <Text style={styles.repoItemDesc} testID="itemdesc">{description}</Text>
+        <Text style={styles.repoItemLang} testID="itemlang">{language}</Text>
       </View>
   </View>;
 };
@@ -95,32 +97,55 @@ const RepoItemStats = ({ star, fork, rev, rating }) => {
     </View>;
 };
 
-const RepoItem = ( {item}) => {
-    const { description, forksCount, fullName, language, ratingAverage, reviewCount, stargazersCount, ownerAvatarUrl } = item;
-    return <View style={styles.repoItem}>
+export const RepoItem = ( {item, standalone=false } ) => {
+  const history = useHistory();
+  const { description, forksCount, fullName, language, ratingAverage, reviewCount, stargazersCount,ownerAvatarUrl } = item;
+
+  const GitHubLink = standalone ? <View style={styles.repoItemStats}><Button onPress={()=>{Linking.openURL(item.url);}} title="Open on GitHub" /><Button onPress={()=>history.push(`/review/${item.id}`)} title="Add a review" /></View> : null;
+
+  return <View style={styles.repoItem}>
     <RepoItemImageDesc fullName={fullName} description={description} language={language} avatarUrl={ownerAvatarUrl} />
     <RepoItemStats star={stargazersCount} fork={forksCount} rev={reviewCount} rating={ratingAverage} />
-    </View>;
+    {GitHubLink}
+  </View>;
 };
 
 const ItemSeparator = () => <View style={styles.separator} />;
 
-const RepositoryList = () => {
-  const { repositories, loading } = useRepositories();
-  const renderItem = ({ item }) => (<RepoItem item={item} />);
+export const RepositoryListContainer = ({ repositories }) => {
+  const history = useHistory();
 
-  if (loading) {
-    return <View><Text>Loading...</Text></View>;
+  const redirSingleItem = (id) => {
+    history.push(`/${id}`);
+  };
+
+  if (!repositories) {
+    return <Text>Repositories not found.</Text>;
   }
+
+  const edges = repositories.edges;
+  let nodes = edges.map( item => { return item.node;});
+
+  const renderItem = ({ item }) => (<Pressable onPress={()=> redirSingleItem(item.id)}><RepoItem item={item} /></Pressable>);
 
   return (
     <FlatList
-      data={repositories}
+      data={nodes}
       ItemSeparatorComponent={ItemSeparator}
       renderItem={renderItem}
       keyExtractor={ item=> item.id }
     />
   );
+};
+
+const RepositoryList = () => {
+  const { repositories, loading } = useRepositories();
+
+  if (loading) {
+    return <View><Text>Loading...</Text></View>;
+  }
+
+  return <RepositoryListContainer repositories={repositories} />;
 };
 
 export default RepositoryList;

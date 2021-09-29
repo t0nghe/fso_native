@@ -9,8 +9,8 @@ import { useHistory } from "react-router-native";
 
 const validationSchema = yup.object().shape(
   {
-    password: yup.string().min(6, "Password should contain at least 6 characters.").required("Password is required."),
-    username: yup.string().min(3, 'Username should contain at least 3 characters.').required("Username is required.")
+    password: yup.string().min(5, "Password should contain at least 6 characters.").max(50, "Password should be shorter than 50 characters.").required("Password is required."),
+    username: yup.string().min(1, 'Username should contain at least 1 character.').max(30, 'Username should be shorter than 30 characters').required("Username is required.")
   }
 );
 
@@ -54,12 +54,18 @@ const SignInForm = ({ onSubmit }) => {
   const [passwordField, passwordMeta, passwordHelpers] = useField('password');
 
   return (<View style={styles.container}>
-    <TextInput placeholder="username" value={usernameField.value} onChangeText={text => usernameHelpers.setValue(text)} style={styles.inputField} autoCapitalize="none" autoCompleteType="off" autoCorrect={false} />
-    {usernameMeta.error?<Text>{usernameMeta.error}</Text>:<Text></Text>}
-    <TextInput placeholder="password" value={passwordField.value} onChangeText={text => passwordHelpers.setValue(text)} secureTextEntry style={styles.inputField} />
-    {passwordMeta.error?<Text>{passwordMeta.error}</Text>:<Text></Text>}
-    <Button onPress={onSubmit} title="Submit" style={styles.submitButton} />
+    <TextInput placeholder="username" value={usernameField.value} onChangeText={text => usernameHelpers.setValue(text)} style={styles.inputField} autoCapitalize="none" autoCompleteType="off" autoCorrect={false} testID="usernameField" />
+    {usernameMeta.error?<Text style={styles.errorText}>{usernameMeta.error}</Text>:<Text></Text>}
+    <TextInput placeholder="password" value={passwordField.value} onChangeText={text => passwordHelpers.setValue(text)} secureTextEntry style={styles.inputField} testID="passwordField" />
+    {passwordMeta.error?<Text style={styles.errorText}>{passwordMeta.error}</Text>:<Text></Text>}
+    <Button onPress={onSubmit} title="Submit" style={styles.submitButton} testID="submitButton" />
   </View>);
+};
+
+export const SignInFormik = ({ onSubmit }) => {
+
+  return (<Formik initialValues={initialValues} onSubmit={onSubmit} validationSchema={validationSchema}>
+    {({handleSubmit})=><SignInForm onSubmit={handleSubmit} />}</Formik>);
 };
 
 const SignIn = () => {
@@ -76,16 +82,9 @@ const SignIn = () => {
     } catch (err) {
       setError(err.message.toString());
     }
-    
-  //   console.log('SignIn: status', status);
-  //   if (status === 'success') {
-  //     history.push('/');
-  //   }
   };
 
-  return (<><Formik initialValues={initialValues} onSubmit={onSubmit} validationSchema={validationSchema}>
-    {({handleSubmit})=><SignInForm onSubmit={handleSubmit} />}
-  </Formik><Text>{error}</Text></>);
+  return (<><SignInFormik onSubmit={onSubmit} /><Text>{error}</Text></>);
 };
 
 export default SignIn;

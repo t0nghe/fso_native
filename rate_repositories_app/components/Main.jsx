@@ -2,9 +2,12 @@ import React from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View } from 'react-native';
 import RepositoryList from './RepositoryList';
+import RepositoryItem from './RepositoryItem';
 import AppBar from './AppBar';
 import { Route, Switch } from 'react-router-native';
-import SignIn from './SignIn'
+import SignIn from './SignIn';
+import SignUp from './SignUp';
+import CreateReview from './CreateReview';
 
 const styles = StyleSheet.create({
   container: {
@@ -28,6 +31,15 @@ const Main = () => {
         </Route>
         <Route path="/signIn">
           <SignIn />
+        </Route>
+        <Route path="/signUp">
+          <SignUp />
+        </Route>
+        <Route path="/review/:repoid">
+          <CreateReview />
+        </Route>
+        <Route path="/:repoid">
+          <RepositoryItem />
         </Route>
       </Switch>
       <StatusBar style="auto" />
